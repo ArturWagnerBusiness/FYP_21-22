@@ -5,48 +5,59 @@ import { Button, Container, Grid, Paper, Switch } from "@mui/material";
 import NotFound from "./pages/NotFound";
 
 // style
-import { S_LinkButton, S_MainPaper, S_ThemeButton } from "./App.style";
+import { S_MainPaper, S_NavigationPaper, S_ThemeButton } from "./App.style";
 
 // pages
 import Questions from "./pages/Questions";
 import Profile from "./pages/Profile";
 import Forum from "./pages/Forum";
-import { I_AppProps, I_AppState } from "./App.interface";
+import { I_AppProps } from "./App.interface";
 import HomePage from "./pages/HomePage";
+import LinkButton from "./components/LinkButton";
+import Login from "./pages/Login";
 
-export default class App extends Component<I_AppProps, I_AppState> {
+export default class App extends Component<I_AppProps> {
+  state = {
+    isLoggedIn: false,
+  };
+  setLoggedStatus = (data: boolean) => {
+    this.setState({ isLoggedIn: data });
+  };
   render() {
     return (
       <Router>
+        {/* Theme change button */}
         <Switch
           checked={this.props.theme}
           onChange={this.props.updateTheme}
           inputProps={{ "aria-label": "controlled" }}
           sx={S_ThemeButton}
         />
-        <Container maxWidth={false}>
-          <Grid spacing={6}>
-            <Link style={S_LinkButton} to="/">
-              <Button>Home</Button>
-            </Link>
-            <Link style={S_LinkButton} to="/questions">
-              <Button>Questions</Button>
-            </Link>
-            <Link style={S_LinkButton} to="/forum">
-              <Button>Forum</Button>
-            </Link>
-            <Link style={S_LinkButton} to="/profile">
-              <Button>Profile</Button>
-            </Link>
-          </Grid>
-        </Container>
+        {/* Navigation bar */}
         <Container maxWidth="xl">
-          <Paper elevation={12} sx={S_MainPaper}>
+          <Paper elevation={6} sx={S_NavigationPaper}>
+            <Grid container direction="row" justifyContent="space-between">
+              <Grid item spacing={6}>
+                <LinkButton path="/" content="HomePage" />
+                <LinkButton path="/questions/list" content="Questions" />
+                <LinkButton path="/forum/list" content="Forum" />
+                <LinkButton path="/profile/view" content="Profile" />
+              </Grid>
+              <Grid item>
+                <LinkButton path="/login" content="Login" />
+              </Grid>
+            </Grid>
+          </Paper>
+        </Container>
+        {/* Individual page content */}
+        <Container maxWidth="xl">
+          <Paper elevation={3} sx={S_MainPaper}>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/questions" element={<Questions />} />
-              <Route path="/forum" element={<Forum />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/questions*" element={<Questions />} />
+              <Route path="/forum*" element={<Forum />} />
+              <Route path="/profile*" element={<Profile />} />
+              <Route path="/login*" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Paper>
