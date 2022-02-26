@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Button, Container, Grid, Paper, Switch } from "@mui/material";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Container, Grid, Paper, Switch } from "@mui/material";
 import NotFound from "./pages/NotFound";
 
 // style
@@ -27,12 +27,6 @@ export default class App extends Component<I_AppProps> {
     return (
       <Router>
         {/* Theme change button */}
-        <Switch
-          checked={this.props.theme}
-          onChange={this.props.updateTheme}
-          inputProps={{ "aria-label": "controlled" }}
-          sx={S_ThemeButton}
-        />
         {/* Navigation bar */}
         <Container maxWidth="xl">
           <Paper elevation={6} sx={S_NavigationPaper}>
@@ -45,6 +39,12 @@ export default class App extends Component<I_AppProps> {
               </Grid>
               <Grid item>
                 <LinkButton path="/login" content="Login" />
+                <Switch
+                  checked={this.props.theme}
+                  onChange={this.props.updateTheme}
+                  inputProps={{ "aria-label": "controlled" }}
+                  sx={S_ThemeButton}
+                />
               </Grid>
             </Grid>
           </Paper>

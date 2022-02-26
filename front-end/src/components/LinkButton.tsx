@@ -9,12 +9,15 @@ interface LinkButtonProps {
 
 const S_LinkButton: React.CSSProperties = {
   textDecoration: "none",
+  padding: "3px",
 };
 export default class LinkButton extends Component<LinkButtonProps> {
   render() {
     return (
       <Link style={S_LinkButton} to={this.props.path}>
-        <Button>{this.props.content}</Button>
+        <Button variant="outlined" size="large">
+          {this.props.content}
+        </Button>
       </Link>
     );
   }
