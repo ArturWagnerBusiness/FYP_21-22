@@ -1,44 +1,95 @@
-import React, { Component } from "react";
+import { Component } from "react";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Container, Grid, Paper, Switch } from "@mui/material";
-import NotFound from "./pages/NotFound";
+import {
+  Button,
+  Container,
+  Grid,
+  Paper,
+  Switch,
+  Typography,
+} from "@mui/material";
+import Cookies from "universal-cookie";
 
-// style
+// Component Style and Typing
 import { S_MainPaper, S_NavigationPaper, S_ThemeButton } from "./App.style";
+import { I_AppProps, I_AppState } from "./App.interface";
 
-// pages
+// Pages
+import HomePage from "./pages/HomePage";
 import Questions from "./pages/Questions";
 import Profile from "./pages/Profile";
 import Forum from "./pages/Forum";
-import { I_AppProps } from "./App.interface";
-import HomePage from "./pages/HomePage";
-import LinkButton from "./components/LinkButton";
 import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 
-export default class App extends Component<I_AppProps> {
-  state = {
-    isLoggedIn: false,
-  };
+// Components
+import LinkButton from "./components/LinkButton";
+
+const cookies = new Cookies();
+
+export default class App extends Component<I_AppProps, I_AppState> {
+  constructor(props: I_AppProps) {
+    super(props);
+    let token = cookies.get("token");
+    this.state = {
+      isLoggedIn: token === undefined ? false : true,
+      shownEmail: token === undefined ? "" : cookies.get("email"),
+    };
+  }
   setLoggedStatus = (data: boolean) => {
-    this.setState({ isLoggedIn: data });
+    if (!data) {
+      cookies.remove("token");
+      cookies.remove("email");
+    }
+    this.setState({
+      isLoggedIn: data,
+      shownEmail: data ? cookies.get("email") : "",
+    });
   };
   render() {
     return (
       <Router>
-        {/* Theme change button */}
         {/* Navigation bar */}
         <Container maxWidth="xl">
           <Paper elevation={6} sx={S_NavigationPaper}>
             <Grid container direction="row" justifyContent="space-between">
               <Grid item spacing={6}>
                 <LinkButton path="/" content="HomePage" />
-                <LinkButton path="/questions/list" content="Questions" />
-                <LinkButton path="/forum/list" content="Forum" />
-                <LinkButton path="/profile/view" content="Profile" />
+                <LinkButton
+                  path="/questions/list"
+                  content="Questions"
+                  disabled={!this.state.isLoggedIn}
+                />
+                <LinkButton
+                  path="/forum/list"
+                  content="Forum"
+                  disabled={!this.state.isLoggedIn}
+                />
+                <LinkButton
+                  path="/profile/view"
+                  content="Profile"
+                  disabled={!this.state.isLoggedIn}
+                />
               </Grid>
               <Grid item>
-                <LinkButton path="/login" content="Login" />
+                {this.state.isLoggedIn ? (
+                  <div>
+                    <Typography>
+                      Logged in as {this.state.shownEmail}
+                    </Typography>
+                    <Button
+                      onClick={() => {
+                        this.setLoggedStatus(false);
+                      }}
+                    >
+                      Log out
+                    </Button>
+                  </div>
+                ) : (
+                  <LinkButton path="/login" content="Login" />
+                )}
+                {/* Theme change button */}
                 <Switch
                   checked={this.props.theme}
                   onChange={this.props.updateTheme}
@@ -57,7 +108,10 @@ export default class App extends Component<I_AppProps> {
               <Route path="/questions*" element={<Questions />} />
               <Route path="/forum*" element={<Forum />} />
               <Route path="/profile*" element={<Profile />} />
-              <Route path="/login*" element={<Login />} />
+              <Route
+                path="/login*"
+                element={<Login setLoggedStatus={this.setLoggedStatus} />}
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Paper>

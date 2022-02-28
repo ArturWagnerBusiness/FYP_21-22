@@ -3,10 +3,11 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
-const app = express();
-
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
+const jwt = require("jsonwebtoken");
+
+const app = express();
 const OAuth2 = google.auth.OAuth2;
 
 // https://dev.to/chandrapantachhetri/sending-emails-securely-using-node-js-nodemailer-smtp-gmail-and-oauth2-g3a
@@ -44,55 +45,138 @@ const createTransporter = async () => {
 
   return transporter;
 };
+
 const sendEmail = async (emailOptions) => {
   let emailTransporter = await createTransporter();
   await emailTransporter.sendMail(emailOptions);
 };
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 // add static
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "..", "front-end", "build")));
+class Codes {
+  storage = {};
+  expire = 30 * 60000; // 30m
+  refresh = 60000; // 1m
 
-let code = "07485243";
-let user = "k1909979";
-let token = "4~92$*24!^£34£u5$£v6^£_0223($^023B25$";
+  /**
+   * @private
+   */
+  generate() {
+    return Math.floor(Math.random() * 100000000).toString();
+  }
+
+  /**
+   * @param {string} email
+   * @returns {string | undefined}
+   */
+  getCode(email) {
+    return this.storage[email]?.code;
+  }
+
+  /**
+   * @param {string} email
+   * @param {number} expireDate
+   * @returns {string | null} code
+   */
+  create(email) {
+    if (this.storage[email] && this.storage[email].refreshDate > Date.now()) {
+      return null;
+    } else {
+      let code = this.generate();
+      this.storage[email] = {
+        code: code,
+        expireDate: Date.now() + this.expire,
+        refreshDate: Date.now() + this.refresh,
+      };
+      return code;
+    }
+  }
+
+  /**
+   * @param {string} email
+   * @param {string} code
+   * @returns {boolean} isSuccessful
+   */
+  verify(email, code) {
+    if (
+      code != this.storage[email].code &&
+      this.storage[email].expireDate > Date.now()
+    ) {
+      return true;
+    }
+    return false;
+  }
+}
+const codes = new Codes();
 
 app.post("/api/authenticate/request", (req, res) => {
-  /*
-  sendEmail({
-    subject: "Test login credentials.",
-    text: `Hello your secret login code for [${user}] is [${code}]. *This is an automatic email. Report to [k1909979@kingston.ac.uk] if you discover abuse.`,
-    html: `Hello your secret login code for <strong>${user}</strong> is <strong>${code}</strong>.<br />This is an automatic email. Report to <strong>k1909979@kingston.ac.uk</strong> if you discover abuse.`,
-    to: user + "@kingston.ac.uk",
-    from: process.env.EMAIL,
-  });
-  */
-  console.log(`/api/authenticate/request> [${user}] send [${code}]`);
-  res.send("Verification code send to email");
-});
-app.post("/api/authenticate/provide", (req, res) => {
-  if (user === req.body?.email && code === req.body?.code) {
-    console.log(
-      `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] -> [${token}]`
-    );
-    res.send(token);
+  let email = req.body?.email;
+  if (email) {
+    let output = codes.create(email);
+    if (output === null) {
+      console.log(
+        `/api/authenticate/request> [${email}] Denied as refresh is too early. -> 429`
+      );
+      res
+        .status(429)
+        .send(
+          "Can not create new verification code. Please wait 60s before attempting again."
+        );
+    } else {
+      let code = codes.getCode(email);
+      /*
+      sendEmail({
+        subject: "Test login credentials.",
+        text: `Hello your secret login code for [${email}] is [${code}].\n *This is an automatic email. Report to [k1909979@kingston.ac.uk] if you discover abuse.`,
+        html: `Hello your secret login code for <strong>${email}</strong> is <strong>${code}</strong>.<br />This is an automatic email. Report to <strong>k1909979@kingston.ac.uk</strong> if you discover abuse.`,
+        to: email + "@kingston.ac.uk",
+        from: process.env.EMAIL,
+      });
+      */
+      console.log(
+        `/api/authenticate/request> [${email}] send [${code}] -> 200`
+      );
+      res.send("Verification code send to email");
+    }
   } else {
-    console.log(
-      `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] -> 400`
-    );
-    res.status(400);
-    res.send("Invalid [Email] and [Verification code]");
+    console.log(`/api/authenticate/request> Missing Email -> 400`);
+    res.status(400).send("Missing Email");
   }
 });
-app.post("/api/authenticate/reset", (req, res) => {
-  if (user === req.body?.email && token === req.body?.token) {
-    console.log(`/api/authenticate/reset> [${req.body?.email}] -> 200`);
-    res.send("Reset");
+let wait = {};
+app.post("/api/authenticate/provide", (req, res) => {
+  if (req.body?.email && req.body?.code) {
+    let email = req.body?.email;
+    if (wait[email] > Date.now() || wait[email] === undefined) {
+      wait[email] = Date.now() + 60000;
+      if (codes.getCode(email) === req.body?.code) {
+        let token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+          expiresIn: "2d",
+        });
+        console.log(
+          `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] Send Token -> 200`
+        );
+        res.send(token);
+      } else {
+        console.log(
+          `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] Bad code -> 400`
+        );
+        res.status(400).send("Wrong Email or Verification code");
+      }
+    } else {
+      console.log(
+        `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] Bad code -> 429`
+      );
+      res.status(429).send("Please wait 30s before trying to login again.");
+    }
   } else {
-    console.log(`/api/authenticate/reset> [${req.body?.email}] -> 400`);
-    res.status(400);
-    res.send("Invalid [Email] and [Verification code]");
+    console.log(
+      `/api/authenticate/provide> Missing Email or Verification code`
+    );
+    res.status(400).send("Missing Email or Verification code");
   }
 });
 

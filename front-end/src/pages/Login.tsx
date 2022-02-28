@@ -3,7 +3,8 @@ import axios from "axios";
 import { Component } from "react";
 import { I_LoginProps, I_LoginState } from "./Login.interface";
 import { S_LoginTitle, S_RowItem, S_SendButton } from "./Login.style";
-
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 export default class Login extends Component<I_LoginProps, I_LoginState> {
   state = {
     isSendDisabled: false,
@@ -38,10 +39,13 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
   sendCode = () => {
     if (this.state.buttonWaitTime !== 0) return;
     this.buttonPressEffect();
-    axios
-      .post("/api/authenticate/request", {
+    axios({
+      method: "post",
+      url: "/api/authenticate/request",
+      data: {
         email: this.state.valueEmail,
-      })
+      },
+    })
       .then(function (response) {
         console.log(response);
       })
@@ -50,11 +54,18 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
       });
   };
   fakeLogin = () => {
-    axios
-      .post("/api/authenticate/provide", {
+    axios({
+      method: "post",
+      url: "/api/authenticate/provide",
+      data: {
         email: this.state.valueEmail,
-      })
-      .then(function (response) {
+        code: this.state.valueCode,
+      },
+    })
+      .then((response) => {
+        cookies.set("token", response.data, { path: "/" });
+        cookies.set("email", this.state.valueEmail, { path: "/" });
+        this.props.setLoggedStatus(true);
         console.log(response);
       })
       .catch(function (error) {
