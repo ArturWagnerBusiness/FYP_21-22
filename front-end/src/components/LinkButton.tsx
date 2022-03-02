@@ -6,6 +6,8 @@ interface LinkButtonProps {
   content: string;
   path: string;
   disabled?: boolean;
+  fullWidth?: boolean | undefined;
+  variant?: "text" | "outlined" | "contained" | undefined;
 }
 
 const S_LinkButton: React.CSSProperties = {
@@ -13,13 +15,27 @@ const S_LinkButton: React.CSSProperties = {
   padding: "3px",
 };
 export default class LinkButton extends Component<LinkButtonProps> {
+  case = (props: any) => {
+    return this.props.disabled ? (
+      <a style={S_LinkButton}>{props.children}</a>
+    ) : (
+      <Link style={S_LinkButton} to={this.props.path}>
+        {props.children}
+      </Link>
+    );
+  };
   render() {
     return (
-      <Link style={S_LinkButton} to={this.props.path}>
-        <Button variant="outlined" size="large" disabled={this.props.disabled}>
+      <this.case>
+        <Button
+          variant={this.props.variant}
+          size="large"
+          disabled={this.props.disabled}
+          fullWidth={this.props.fullWidth}
+        >
           {this.props.content}
         </Button>
-      </Link>
+      </this.case>
     );
   }
 }

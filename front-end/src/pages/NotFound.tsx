@@ -5,7 +5,7 @@ export default class NotFound extends Component {
   render() {
     return (
       <div>
-        Error 404: Page not found. (You can go to <Link to={"/"}>home</Link>)
+        Error 404: Panel not found. (Redirect to <Link to={"/"}>HOME</Link>)
       </div>
     );
   }

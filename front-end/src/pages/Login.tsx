@@ -38,7 +38,7 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
   };
   sendCode = () => {
     if (this.state.buttonWaitTime !== 0) return;
-    this.buttonPressEffect();
+
     axios({
       method: "post",
       url: "/api/authenticate/request",
@@ -46,10 +46,11 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
         email: this.state.valueEmail,
       },
     })
-      .then(function (response) {
+      .then((response) => {
+        this.buttonPressEffect();
         console.log(response);
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error);
       });
   };
@@ -94,7 +95,7 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
               }}
             />
           </Grid>
-          <Grid sx={S_RowItem} container spacing={2}>
+          <Grid sx={S_RowItem} container spacing={0.5}>
             <Grid item xs={8}>
               <TextField
                 id="user-code"
@@ -125,6 +126,7 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
                 onClick={this.sendCode}
                 size="large"
                 disabled={this.state.isSendDisabled}
+                fullWidth
               >
                 {this.state.isSendDisabled ? (
                   <Typography variant="caption">
