@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { Component } from "react";
+import axios from "axios";
 
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -16,6 +17,9 @@ import CodeIcon from "@mui/icons-material/Code";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import PublishIcon from "@mui/icons-material/Publish";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 type T_Fonts = "Arial";
 type T_Languages = "Javascript";
@@ -40,14 +44,17 @@ interface I_ObjectCode extends I_ObjectGeneral {
   language: T_Languages;
 }
 export default class Create extends Component {
+  title: string = "";
   data: (I_ObjectText | I_ObjectImage | I_ObjectCode)[] = [];
+  tests: any = []; //! ADD TESTS LATER <=====
   constructor(props: any) {
     super(props);
     let possibleData = localStorage.getItem("createQuestion");
     if (possibleData !== null) {
       let save = JSON.parse(possibleData);
+      this.title = save.title;
       this.data = save.content;
-    } else {
+      this.tests = save.tests;
     }
   }
   private delete(id: number) {
@@ -110,13 +117,36 @@ export default class Create extends Component {
     localStorage.setItem(
       "createQuestion",
       JSON.stringify({
-        title1: "",
-        title2: "",
+        title: "",
         content: this.data,
+        tests: this.tests,
       })
     );
   }
-  private publish() {}
+  private publish() {
+    let publishPackage = {
+      email: cookies.get("email"),
+      token: cookies.get("token"),
+      page: {
+        title: this.title,
+        content: this.data,
+        tests: this.tests,
+      },
+    };
+
+    axios({
+      method: "post",
+      url: "/api/questions/create",
+      data: publishPackage,
+    })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    console.log(publishPackage);
+  }
   componentWillUnmount() {
     this.saveQuestionObject();
   }
@@ -125,6 +155,16 @@ export default class Create extends Component {
       <Grid container spacing={1} direction="column">
         <Grid item>
           <Typography variant="h5">Page content</Typography>
+        </Grid>
+        <Grid item>
+          <TextField
+            fullWidth
+            value={this.title}
+            onChange={(event) => {
+              this.title = event.target.value;
+              this.forceUpdate();
+            }}
+          />
         </Grid>
         {this.data
           .sort((a, b) => {
