@@ -17,7 +17,7 @@ import { I_AppProps, I_AppState } from "./App.interface";
 
 // Pages
 import HomePage from "./pages/HomePage";
-import Questions from "./pages/Questions";
+import Exercises from "./pages/Exercises";
 import Profile from "./pages/Profile";
 import Forum from "./pages/Forum";
 import Login from "./pages/Login";
@@ -57,8 +57,8 @@ export default class App extends Component<I_AppProps, I_AppState> {
               <Grid item spacing={6}>
                 <LinkButton path="/" content="HomePage" />
                 <LinkButton
-                  path="/questions/list"
-                  content="Questions"
+                  path="/exercises/list"
+                  content="Exercises"
                   disabled={!this.state.isLoggedIn}
                 />
                 <LinkButton
@@ -105,7 +105,7 @@ export default class App extends Component<I_AppProps, I_AppState> {
           <Paper elevation={3} sx={S_MainPaper}>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/questions*" element={<Questions />} />
+              <Route path="/exercises*" element={<Exercises />} />
               <Route path="/forum*" element={<Forum />} />
               <Route path="/profile*" element={<Profile />} />
               <Route

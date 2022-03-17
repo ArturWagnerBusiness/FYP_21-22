@@ -1,24 +1,19 @@
-import { Fab, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import React, { Component } from "react";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
+import { Component } from "react";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { ListItemProps } from "./ListItem.interface";
 
-export default class ListItem extends Component<{
-  data: {
-    title?: string;
-    date?: string;
-    email?: string;
-    description?: string;
-    path?: string;
-    hidden?: boolean;
-  };
-}> {
+export default class ListItem extends Component<ListItemProps> {
   render() {
     return (
       <Paper elevation={10} sx={{ padding: "5px" }}>
         <Grid container direction="row" justifyContent="space-between">
           <Grid item xs={"auto"}>
             {this.props.data.title ? (
-              <Typography variant="h6">{this.props.data.title}</Typography>
+              <Typography variant="h6">
+                {this.props.data.title}{" "}
+                {this.props.data.likes ? `(+${this.props.data.likes})` : `(0)`}
+              </Typography>
             ) : (
               <Skeleton variant="text" width={300} height={48} />
             )}
@@ -50,18 +45,29 @@ export default class ListItem extends Component<{
         >
           <Grid item xs={"auto"}>
             {this.props.data.email ? (
-              <Typography>By {this.props.data.email}</Typography>
+              <Typography>By {this.props.data.email.toUpperCase()}</Typography>
             ) : (
               <Skeleton variant="text" width={140} />
             )}
           </Grid>
           <Grid item xs={"auto"}>
+            <br />
             {this.props.data.path ? (
-              <Fab size="medium" href={this.props.data.path}>
-                <PlayArrowIcon />
-              </Fab>
+              <Button
+                variant="outlined"
+                endIcon={<OpenInNewIcon />}
+                href={this.props.data.path}
+                target="_blank"
+              >
+                Start Exercise
+              </Button>
             ) : (
-              <Skeleton variant="circular" height={48} width={48} />
+              <Skeleton
+                variant="rectangular"
+                height={45}
+                width={200}
+                sx={{ borderRadius: "5px" }}
+              />
             )}
           </Grid>
         </Grid>

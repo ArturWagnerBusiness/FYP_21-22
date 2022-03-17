@@ -31,7 +31,7 @@ CREATE TABLE `pages` (
 
 **TIP:** `id` is has to be later set to `Primary key` and `Auto Incremental`
 
-# Entries for API `./back-end/`
+# Entries for API `./back-end/` (Might be outdated for now)
 
     Format: [Request] [Path] [Body Requirements]
 
@@ -51,6 +51,10 @@ Once **email** and correct **code** are provided then a verification token will 
 
 Question html gets generated from the data received from the mysql server.
 
-**GET** `/api/questions/recent/:email/:page"`
+**GET** `/api/exercises/content/:time/:email/:page"`
 
-Sends first 10 questions offset by (:page-1)\*10 created by :email. It is possible to is :email "**all**" to get questions made by all
+Sends first 10 questions offset by (_:page_-1)\*10 created by _:email_. It is possible to select _:email_ "**all**" to get questions made by all. Parameter _:time_ can be inserted to get all **recent** for example
+
+**GET** `/api/exercises/count/:email/"`
+
+Get amount of questions for _:email_ or **all**
