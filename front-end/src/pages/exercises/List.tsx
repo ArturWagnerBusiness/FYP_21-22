@@ -34,7 +34,18 @@ export default class List extends Component<
     searchBox: "",
     order: "recent",
   };
-  data: ListItemProps["data"][] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+  data: ListItemProps["data"][] = [
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+    { id: -1 },
+  ];
   componentDidMount() {
     this.renderPage(1);
   }
@@ -84,16 +95,16 @@ export default class List extends Component<
           path: `https://www.nooblab.com/NoobLab/contents/${window.location.hostname}/api/exercises/1`,
           hidden: false,
           likes: 10,
-        },*/ {}, // Replace this one with the one on top for testing.
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
+        },*/ { id: -1 }, // Replace this one with the one on top for testing.
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
+        { id: -1 },
       ];
 
       let request = {
@@ -111,27 +122,43 @@ export default class List extends Component<
             let x = 0;
             console.log(response.data);
             response.data.forEach((item: any) => {
-              let data = JSON.parse(item.data);
-              this.data[x] = {
-                title: data?.title ? data?.title : "No title",
-                date: new Date(item.date_added).toLocaleString("en-GB", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }),
-                email: item?.email ? item?.email : "No Email",
-                description: data?.description
-                  ? data?.description
-                  : "No description",
-                path: `https://www.nooblab.com/NoobLab/contents/${window.location.hostname}/api/exercises/${item.id}`,
-                hidden: false,
-                likes: item?.likes ? parseInt(item?.likes) : 0,
-              };
-
+              console.log(item);
+              ((slotID: number) => {
+                axios({
+                  method: "post",
+                  url: "/api/exercises/likes/",
+                  data: {
+                    exercise: item?.id,
+                    email: item?.email,
+                  },
+                }).then((likedRespond) => {
+                  console.log(likedRespond.data);
+                  let liked = likedRespond.data.length !== 0;
+                  let data = JSON.parse(item.data);
+                  this.data[slotID] = {
+                    id: item?.id >= 0 ? parseInt(item?.id) : -1,
+                    title: data?.title ? data?.title : "No title",
+                    date: new Date(item.date_added).toLocaleString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }),
+                    email: item?.email ? item?.email : "No Email",
+                    description: data?.description
+                      ? data?.description
+                      : "No description",
+                    path: `https://www.nooblab.com/NoobLab/contents/${window.location.hostname}/api/exercises/${item.id}`,
+                    hidden: false,
+                    likes: item?.likes ? parseInt(item?.likes) : 0,
+                    liked,
+                  };
+                  this.forceUpdate();
+                });
+              })(x); // Doing this to keep x from being altered while request runs.
               x++;
             });
             while (x < 10) {
-              this.data[x] = { hidden: true };
+              this.data[x] = { id: -1, hidden: true };
               x++;
             }
           }
@@ -218,7 +245,21 @@ export default class List extends Component<
           if (x?.hidden !== true) {
             return (
               <Grid item xs={6}>
-                <ListItem data={x} />
+                <ListItem
+                  data={x}
+                  parentRender={() => {
+                    axios({
+                      method: "post",
+                      url: "/api/exercises/like/",
+                      data: {
+                        exercise: x.id,
+                        email: x.email,
+                      },
+                    }).then(() => {
+                      this.renderPage(this.state.page);
+                    });
+                  }}
+                />
               </Grid>
             );
           }

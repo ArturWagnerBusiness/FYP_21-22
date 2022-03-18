@@ -1,5 +1,6 @@
 export interface ListItemProps {
   data: {
+    id: number;
     title?: string;
     date?: string;
     email?: string;
@@ -7,5 +8,7 @@ export interface ListItemProps {
     path?: string;
     hidden?: boolean;
     likes?: number;
+    liked?: boolean;
   };
+  parentRender: Function;
 }

@@ -1,6 +1,8 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { Component } from "react";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+
 import { ListItemProps } from "./ListItem.interface";
 
 export default class ListItem extends Component<ListItemProps> {
@@ -10,10 +12,7 @@ export default class ListItem extends Component<ListItemProps> {
         <Grid container direction="row" justifyContent="space-between">
           <Grid item xs={"auto"}>
             {this.props.data.title ? (
-              <Typography variant="h6">
-                {this.props.data.title}{" "}
-                {this.props.data.likes ? `(+${this.props.data.likes})` : `(0)`}
-              </Typography>
+              <Typography variant="h6">{this.props.data.title}</Typography>
             ) : (
               <Skeleton variant="text" width={300} height={48} />
             )}
@@ -52,6 +51,16 @@ export default class ListItem extends Component<ListItemProps> {
           </Grid>
           <Grid item xs={"auto"}>
             <br />
+            <Button
+              endIcon={<ThumbUpIcon />}
+              disabled={this.props.data.liked}
+              onClick={() => {
+                // Get ID
+                this.props.parentRender();
+              }}
+            >
+              {this.props.data.likes ? `${this.props.data.likes}` : `0`}
+            </Button>
             {this.props.data.path ? (
               <Button
                 variant="outlined"

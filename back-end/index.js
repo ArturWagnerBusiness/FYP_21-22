@@ -354,6 +354,54 @@ app.post("/api/exercises/count/", (req, res) => {
     }
   );
 });
+app.post("/api/exercises/like/", (req, res) => {
+  let exercise = parseInt(req.body.exercise); // kill request if fails
+  let email = req.body.email;
+  connection.query(
+    `SELECT * FROM likes WHERE exercise = ? AND user = ?`,
+    [exercise, email],
+    (error, results, fields) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send(""); // No message as it is read by Nooblab
+        return;
+      }
+      if (results.length == 0) {
+        // Exercise not liked so like
+        connection.query(
+          `INSERT INTO likes (exercise, user) VALUES (?, ?)`,
+          [exercise, email],
+          (error, results, fields) => {
+            if (error) {
+              console.log(error, exercise, email);
+              res.status(400).send("Can't like. Bad data");
+            } else {
+              console.log("WORKED YES");
+              res.send("Success");
+            }
+          }
+        );
+      } else {
+        res.status(400).send("Can't like. Bad data");
+      }
+    }
+  );
+});
+app.post("/api/exercises/likes/", (req, res) => {
+  let exercise = parseInt(req.body.exercise); // kill request if fails
+  let email = req.body.email;
+  connection.query(
+    `SELECT * FROM likes WHERE exercise = ? AND user = ?`,
+    [exercise, email],
+    (error, results, fields) => {
+      if (error) {
+        res.status(500).send(""); // No message as it is read by Nooblab
+        return;
+      }
+      res.send(results);
+    }
+  );
+});
 //
 app.get("*", (req, res) => {
   res.sendFile("index.html", {
