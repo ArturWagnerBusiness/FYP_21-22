@@ -19,3 +19,8 @@ export interface I_ObjectCode extends I_ObjectGeneral {
   type: "code";
   language: T_Languages;
 }
+
+export interface I_Test {
+  type: "codeIncludes" | "testFinalOutput" | "testFinalOutputJS";
+  content: string;
+}

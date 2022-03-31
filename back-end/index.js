@@ -289,8 +289,34 @@ ${data.content
   })
   .join("")}
 <!-- USER TESTS -->
-${data.tests}
-EOF;
+${
+  data.tests === []
+    ? "<p>[Tests] No tests found for this exercise!</p>"
+    : `<p>Run test below</p>
+<div class="testCase" id="Hello">
+    <div class="medalType">bronze</div>
+    <div class="medalDesc">Hello</div>
+    <div class="test">
+        ${data.tests
+          .map((item) => {
+            console.log(data.tests);
+            switch (item.type) {
+              case "testFinalOutput":
+                return `<div class="testFinalOutput">${item.content}</div>`;
+              case "codeIncludes":
+                return `<div class="codeIncludes">${item.content}</div>`;
+              default: // Code will exit as this feature needs more work to be fully secure.
+                return "";
+                return `<div class="testFinalOutputJS">
+  ${item.content}
+  feedback("Your program doesn't print the text we were expecting.");
+</div>`;
+            }
+          })
+          .join("")}
+    </div>
+</div>`
+}
 `);
     }
   );
@@ -378,7 +404,7 @@ app.post("/api/exercises/like/", (req, res) => {
             } else {
               console.log("WORKED YES");
               res.send("Success");
-            }
+            } // guardian leak tables
           }
         );
       } else {

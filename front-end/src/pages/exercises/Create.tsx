@@ -26,7 +26,13 @@ import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatSizeIcon from "@mui/icons-material/FormatSize";
-import { I_ObjectCode, I_ObjectImage, I_ObjectText } from "./Create.interface";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import {
+  I_ObjectCode,
+  I_ObjectImage,
+  I_ObjectText,
+  I_Test,
+} from "./Create.interface";
 
 const cookies = new Cookies();
 
@@ -34,7 +40,7 @@ export default class Create extends Component {
   title: string = "";
   description: string = "";
   data: (I_ObjectText | I_ObjectImage | I_ObjectCode)[] = [];
-  tests: any = []; //! ADD TESTS LATER <=====
+  tests: I_Test[] = [];
   constructor(props: any) {
     super(props);
     let possibleData = localStorage.getItem("createExercises");
@@ -62,7 +68,7 @@ export default class Create extends Component {
     });
     return largest;
   }
-  private generate(type: "text" | "image" | "code") {
+  private generate(type: "text" | "image" | "code" | "test") {
     let id = this.getLastID() + 1;
     if (type === "text") {
       this.data.push({
@@ -82,12 +88,17 @@ export default class Create extends Component {
         content: "",
         selfHost: false,
       });
-    } else {
+    } else if (type === "code") {
       this.data.push({
         type: "code",
         order: id,
         content: "",
         language: "Javascript",
+      });
+    } else {
+      this.tests.push({
+        type: "codeIncludes",
+        content: "",
       });
     }
     this.forceUpdate();
@@ -124,7 +135,6 @@ export default class Create extends Component {
         tests: this.tests,
       },
     };
-
     axios({
       method: "post",
       url: "/api/exercises/create",
@@ -132,6 +142,7 @@ export default class Create extends Component {
     })
       .then((response) => {
         console.log(response);
+        document.location.href = "/exercises/list";
       })
       .catch(function (error) {
         console.log(error);
@@ -371,6 +382,85 @@ export default class Create extends Component {
         </Grid>
         <Grid item>
           <Typography variant="h5">Tests</Typography>
+        </Grid>
+        {
+          // Individual custom Content entry field
+          this.tests.map((item) => {
+            return (
+              <Grid item>
+                <Paper elevation={8} sx={{ padding: 1 }}>
+                  <Grid container>
+                    <Grid item container xs={true} spacing={1}>
+                      <Grid item xs={12} container spacing={1}>
+                        <Grid item>
+                          <ToggleButtonGroup
+                            value={item.type}
+                            onChange={(event, value) => {
+                              if (value === null) return;
+                              item.type = value;
+                              this.forceUpdate();
+                            }}
+                            sx={{ height: "100%" }}
+                            exclusive
+                          >
+                            <ToggleButton value="codeIncludes">
+                              Check if code includes CONTENT (Broken)
+                            </ToggleButton>
+                            <ToggleButton value="testFinalOutput">
+                              Check if code prints CONTENT
+                            </ToggleButton>
+                            <ToggleButton value="testFinalOutputJS">
+                              Run test code (W.I.P)
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+                        </Grid>
+                      </Grid>
+                      <Grid item xs={true}>
+                        <TextField
+                          placeholder="Content"
+                          multiline
+                          rows={item.type === "testFinalOutputJS" ? 6 : 2}
+                          fullWidth
+                          value={item.content}
+                          onChange={(event) => {
+                            item.content = event.target.value;
+                            this.forceUpdate();
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        onClick={() => {
+                          this.tests = this.tests.filter((test) => {
+                            return test !== item;
+                          });
+                          this.forceUpdate();
+                        }}
+                        style={{
+                          height: "100%",
+                        }}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+            );
+          })
+        }
+        <Grid item>
+          <ButtonGroup variant="outlined" fullWidth>
+            <Button
+              startIcon={<BugReportIcon />}
+              onClick={() => {
+                this.generate("test");
+              }}
+            >
+              add test
+            </Button>
+          </ButtonGroup>
         </Grid>
         {/* Publish buttons */}
         <Grid item position="relative">
