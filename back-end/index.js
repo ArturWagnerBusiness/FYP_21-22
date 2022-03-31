@@ -383,6 +383,11 @@ app.post("/api/exercises/count/", (req, res) => {
 app.post("/api/exercises/like/", (req, res) => {
   let exercise = parseInt(req.body.exercise); // kill request if fails
   let email = req.body.email;
+  let decoded = jwt.verify(req.body.token, process.env.JWT_PRIVATE);
+  if (decoded?.email !== email) {
+    res.status(400).send("Could not verify user.");
+    return;
+  }
   connection.query(
     `SELECT * FROM likes WHERE exercise = ? AND user = ?`,
     [exercise, email],

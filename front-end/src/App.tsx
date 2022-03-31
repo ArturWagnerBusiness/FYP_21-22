@@ -39,8 +39,8 @@ export default class App extends Component<I_AppProps, I_AppState> {
   }
   setLoggedStatus = (data: boolean) => {
     if (!data) {
-      cookies.remove("token");
-      cookies.remove("email");
+      cookies.remove("token", { path: "/" });
+      cookies.remove("email", { path: "/" });
     }
     this.setState({
       isLoggedIn: data,

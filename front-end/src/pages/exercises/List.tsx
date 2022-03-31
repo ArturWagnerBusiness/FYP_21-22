@@ -16,7 +16,8 @@ import { Component } from "react";
 import ListItem from "../../components/ListItem";
 import SearchIcon from "@mui/icons-material/Search";
 import { ListItemProps } from "../../components/ListItem.interface";
-
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 export default class List extends Component<
   {},
   {
@@ -254,6 +255,7 @@ export default class List extends Component<
                       data: {
                         exercise: x.id,
                         email: x.email,
+                        token: cookies.get("token"),
                       },
                     }).then(() => {
                       this.renderPage(this.state.page);
