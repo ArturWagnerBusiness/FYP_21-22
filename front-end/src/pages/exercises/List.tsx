@@ -130,7 +130,7 @@ export default class List extends Component<
                   url: "/api/exercises/likes/",
                   data: {
                     exercise: item?.id,
-                    email: item?.email,
+                    email: cookies.get("email"),
                   },
                 }).then((likedRespond) => {
                   console.log(likedRespond.data);
@@ -254,7 +254,7 @@ export default class List extends Component<
                       url: "/api/exercises/like/",
                       data: {
                         exercise: x.id,
-                        email: x.email,
+                        email: cookies.get("email"),
                         token: cookies.get("token"),
                       },
                     }).then(() => {
