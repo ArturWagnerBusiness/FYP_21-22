@@ -16,7 +16,16 @@ Once you have installed all the dependencies you can run the project with client
 
 ## NOTE: MySQL server is needed
 
-Can be run at port localhost:3306
+Can be run at port localhost:3306 (The server will try to connect to server below)
+
+```javascript
+const connection = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "db",
+});
+```
 
 A database called `db` needs to exist with a table called `pages`.
 
