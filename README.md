@@ -29,6 +29,10 @@ const connection = mysql.createConnection({
 
 A database called `db` needs to exist with a table called `pages`.
 
+You can extract it from `./db.sql`
+
+example at `./.env` can be moved into `./back-end/.env` with your own parameters inside it.
+
 ```sql
 CREATE TABLE `pages` (
   `id` int(11) NOT NULL,

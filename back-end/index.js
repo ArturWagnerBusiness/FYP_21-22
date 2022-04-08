@@ -164,6 +164,18 @@ let wait = {};
 app.post("/api/authenticate/provide", (req, res) => {
   if (req.body?.email && req.body?.code) {
     let email = req.body?.email;
+    /* TEMPORARY PASS FOR VIVA */
+    if (req.body?.code === "-0000000") {
+      let token = jwt.sign({ email: email }, process.env.JWT_PRIVATE, {
+        expiresIn: "2d",
+      });
+      console.log(
+        `/api/authenticate/provide> [${req.body?.email}]-[${req.body?.code}] Send Token -> 200`
+      );
+      res.send(token);
+      return;
+    }
+    /* ----------------------- */
     if (wait[email] > Date.now() || wait[email] === undefined) {
       wait[email] = Date.now() + 60000;
       if (codes.getCode(email) === req.body?.code) {
