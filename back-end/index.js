@@ -79,7 +79,7 @@ class Codes {
    * @private
    */
   generate() {
-    return Math.floor(Math.random() * 100000000).toString();
+    return Math.floor(Math.random() * 90000000 + 10000000).toString();
   }
 
   /**
