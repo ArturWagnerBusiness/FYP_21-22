@@ -99,7 +99,7 @@ export default class Login extends Component<I_LoginProps, I_LoginState> {
             <Grid item xs={8}>
               <TextField
                 id="user-code"
-                label="Email verification code"
+                label="Email verification code (Demo enter: -0000000)"
                 variant="outlined"
                 fullWidth
                 value={this.state.valueCode}
