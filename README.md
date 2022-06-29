@@ -1,3 +1,18 @@
+# About the project
+
+A platform that allowed the user to generate their own content (programming exercises) was developed during my final year at Kingston University.
+
+The execution was handled by [NoobLab](https://www.nooblab.com/nooblab/) system already existing at the university.
+
+Project-oriented with allowing the university to gain a permanent source of new exercises from past students, that would be provided to the new/future students.
+
+### The main system features developed:
++ Create exercises
++ Allow for automatic exercise testing+execution (Passed to NoobLab)
++ Search for exercises (Sort by + Word Query)
++ Rate Exercises (Like system)
++ Secure Login System
+
 # How to run
 
 Firstly go to `./back-end/` and run `npm i` to install the packages.
